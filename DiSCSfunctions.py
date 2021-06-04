@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 
-def find_best_cut_positions(input_list, max_sections=6, grainsize=3):
+def find_best_cut_positions(input_list, max_sections=7, grainsize=2):
     max_sections = min(max_sections, len(input_list)-1)
     grainsize = min(max_sections/2, grainsize)
     cut_positions_gen, stat_gen = find_best_cut_positions_genetic(input_list, max_sections, grainsize)
