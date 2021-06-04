@@ -68,7 +68,7 @@ def find_max_sections(n, p):
 
 
 # SIMULATION #
-# 0) Specify default parameters for sequences
+# 0) Specify default parameters for sequences.
 number_of_states_values = [2, 3, 4]
 number_of_actions_in_each_state_values = [2, 4, 6]
 p_between_state_values = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
@@ -83,7 +83,7 @@ sequence_length = sequence_length_values[5]
 grainsize=grainsize_values[8]
 p_common_action = 0
 
-# 1) Specify what to loop over
+# 1) Specify what to loop over. Change the for loop variables to test the different parameters above
 for p_between_state in [0.05, 0.1]:
     max_sections = find_max_sections(sequence_length, p_between_state)
     for x in range(20): # repeat 20 times at each value
