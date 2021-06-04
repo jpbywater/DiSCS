@@ -1,59 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy import stats, special
 import random
 from operator import itemgetter
 import itertools
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-
-
-def get_category_names_from_list(input_list):
-    return list(sorted(set(input_list)))
-
-
-def make_graph_of_input_data(input_list, add_cut_positions=False, cut_positions=[], fname=""):
-    y_vars = get_category_names_from_list(input_list)
-    x = []
-    y = []
-    for position, item in enumerate(input_list):
-        x.append(position)
-        y.append(y_vars.index(item))
-    plt.figure(num=None, figsize=[5,2], dpi=150, facecolor='w', edgecolor='k')
-    plt.subplots_adjust(left=0.2)
-    plt.style.use('bmh')
-    plt.scatter(x, y, s=144/len(y_vars), marker="o")
-    if not add_cut_positions:
-        plt.title('Plot of input sequence')
-    else:
-        plt.title('Plot of input sequence with split positions')
-    plt.xlabel('Position in sequence')
-    plt.yticks(np.arange(len(y_vars)), y_vars)
-    plt.tick_params(axis='both', which='major', labelsize=30/len(y_vars))
-    plt.ylim(-0.5, len(y_vars) - 0.5)
-    plt.xlim(-0.6, len(x)-0.4)
-    if add_cut_positions:
-        for i in range(len(cut_positions)):
-            plt.axvline(x=cut_positions[i]-0.5, linewidth=max(100/len(input_list), 3), color='white')
-    if fname != "":
-        plt.savefig(fname)
-    return
-
-
-def make_counts_array(input_list):
-    # make a 2D array with each entry containing an 1D array with the total counts for each category
-    # where the totals are [from row, to (but not including) row]
-    n = len(input_list)
-    column_headings = get_category_names_from_list(input_list)
-    sparse_array = np.zeros((len(input_list), len(column_headings)), dtype=int)
-    for index, item in enumerate(input_list):
-        sparse_array[index, column_headings.index(item)]=1
-    counts_array = np.zeros((n, n + 1), dtype=object)
-    for start in range(0, n):
-        for stop in range(0, n + 1):
-            if stop > start:  # only do this if it makes sense
-                counts_array[start, stop] = counts_array[start, stop - 1] + sparse_array[stop - 1]
-    return counts_array
 
 
 def find_best_cut_positions(input_list, max_sections=6, grainsize=3):
@@ -68,13 +19,6 @@ def find_best_cut_positions(input_list, max_sections=6, grainsize=3):
         cut_positions = cut_positions_gen
         stat = stat_gen
     return cut_positions, stat
-
-
-def combine_g(f, i, g, grainsize=0):
-    if grainsize < 0:
-        grainsize = 0
-    output = ((f * (i + grainsize)) + g) / (i + 1 + grainsize)
-    return output
 
 
 def get_array_comparison_stat(array1, array2, fn="two_props"):
@@ -99,6 +43,38 @@ def get_array_comparison_stat(array1, array2, fn="two_props"):
         abs_zscore = abs(props1 - props2) / se
         stat = abs_zscore.sum() / len(abs_zscore)
         return stat
+
+
+def find_best_cut_positions_brute_force(input_list, max_sections=3, grainsize=1):
+    n = len(input_list)
+    counts = make_counts_array(input_list)
+    ft = []
+    cpt = []
+    for c in range(2, max_sections+1):
+        # print("working on", c, "sections...")
+        if n>=c:
+            fs = []
+            cps = []
+            for combos in itertools.combinations(list(range(1, n)), c - 1):
+                cut_positions = [0] + list(combos) + [n]
+                f=0
+                for i in range (len(cut_positions)-2):
+                    array1 = counts[cut_positions[i], cut_positions[i+1]]
+                    array2 = counts[cut_positions[i+1], cut_positions[i+2]]
+                    g = get_array_comparison_stat(array1, array2)
+                    f = combine_g(f, i, g, grainsize)
+                fs.append(f)
+                cps.append(cut_positions)
+            ft.append(np.array(fs).max())
+            cpt.append(cps[np.array(fs).argmax()])
+    best_f = np.array(ft).max()
+    best_cuts = cpt[np.array(ft).argmax()]
+    sections = []
+    for x in range (len(best_cuts)-1):
+        start=best_cuts[x]
+        end=best_cuts[x+1]
+        sections.append(input_list[start:end])
+    return best_cuts, best_f
 
 
 def find_best_cut_positions_genetic(input_list, max_sections=5, grainsize=1, mate_prob=0.5, mut_prob=0.3):
@@ -233,38 +209,6 @@ def find_best_cut_positions_dynamic(input_list, max_sections=5, grainsize=1):
     return cut_positions_asc, best_f
 
 
-def find_best_cut_positions_brute_force(input_list, max_sections=3, grainsize=1):
-    n = len(input_list)
-    counts = make_counts_array(input_list)
-    ft = []
-    cpt = []
-    for c in range(2, max_sections+1):
-        # print("working on", c, "sections...")
-        if n>=c:
-            fs = []
-            cps = []
-            for combos in itertools.combinations(list(range(1, n)), c - 1):
-                cut_positions = [0] + list(combos) + [n]
-                f=0
-                for i in range (len(cut_positions)-2):
-                    array1 = counts[cut_positions[i], cut_positions[i+1]]
-                    array2 = counts[cut_positions[i+1], cut_positions[i+2]]
-                    g = get_array_comparison_stat(array1, array2)
-                    f = combine_g(f, i, g, grainsize)
-                fs.append(f)
-                cps.append(cut_positions)
-            ft.append(np.array(fs).max())
-            cpt.append(cps[np.array(fs).argmax()])
-    best_f = np.array(ft).max()
-    best_cuts = cpt[np.array(ft).argmax()]
-    sections = []
-    for x in range (len(best_cuts)-1):
-        start=best_cuts[x]
-        end=best_cuts[x+1]
-        sections.append(input_list[start:end])
-    return best_cuts, best_f
-
-
 def cluster_blocks(input_list, cut_positions):
     all_block_proportions_list = []
     counts = make_counts_array(input_list)
@@ -290,19 +234,66 @@ def cluster_blocks(input_list, cut_positions):
     return clustering_stat, number_of_clusters, clusterIDs, cluster_centers
 
 
-def make_cluster_graphs(input_list, number_of_clusters, clusterIDs, cluster_centers, fname=""):
-    y_vars = get_category_names_from_list(input_list)
-    y_pos = np.arange(len(y_vars))
-    fig, ax = plt.subplots(1, number_of_clusters, sharex=True, sharey=True, figsize=(5, 2), dpi=100)
-    for cluster in range(number_of_clusters):
-        n = clusterIDs.tolist().count(cluster)
-        ax[cluster].barh(y_pos, cluster_centers[cluster], align='center')
-        ax[cluster].set_title('Cluster ' + str(cluster) + '\n' + 'n = ' + str(n))
-        ax[cluster].set_yticks(y_pos)
-        ax[cluster].set_yticklabels(y_vars)
-        ax[cluster].set_xlim([0, 1])
-    if fname != "":
-        plt.savefig(fname)
-    return
+def cluster_blocks_multi(list_of_pairs_of_actions_and_cut_positions, max_allowed_clusters = 7):
+    # get all categories
+    all_actions = []
+    for pair in list_of_pairs_of_actions_and_cut_positions:
+        all_actions.extend(pair[0])
+    all_categories = get_category_names_from_list(all_actions)
+    print("ALL:", all_actions)
+    print("lenALL:", len(all_actions))
+    print("col headings", all_categories)
+
+    all_block_proportions_list = []
+    for pair in list_of_pairs_of_actions_and_cut_positions:
+        input_list = pair[0]
+        cut_positions = pair[1]
+        sparse_array = np.zeros((len(input_list), len(all_categories)), dtype=int)
+        for index, item in enumerate(input_list):
+            sparse_array[index, all_categories.index(item)]=1
+        for i in range(len(cut_positions)-1):
+            segment = sparse_array[cut_positions[i]:cut_positions[i+1], :]
+            block_proportions = segment.sum(axis=0)/segment.sum()
+            all_block_proportions_list.append(block_proportions)
+    all_block_proportions_array = np.array(all_block_proportions_list)
+    clustering_output = []
+    for j in range(2, max_allowed_clusters-1):
+        clusterer = KMeans(n_clusters=j)
+        for i in range(100):
+            clusterIDs = clusterer.fit_predict(all_block_proportions_array)
+            cluster_centers = clusterer.cluster_centers_
+            clustering_score = silhouette_score(all_block_proportions_array, clusterIDs, metric='euclidean')
+            clustering_output.append([clustering_score, j, clusterIDs, cluster_centers])
+    best_clustering_output = sorted(clustering_output, key=itemgetter(0), reverse=True)[0]
+    clustering_stat = best_clustering_output[0]
+    number_of_clusters = best_clustering_output[1]
+    clusterIDs = best_clustering_output[2]
+    cluster_centers = best_clustering_output[3]
+    return clustering_stat, number_of_clusters, clusterIDs, cluster_centers, all_categories
 
 
+def combine_g(f, i, g, grainsize=0):
+    if grainsize < 0:
+        grainsize = 0
+    output = ((f * (i + grainsize)) + g) / (i + 1 + grainsize)
+    return output
+
+
+def get_category_names_from_list(input_list):
+    return list(sorted(set(input_list)))
+
+
+def make_counts_array(input_list):
+    # make a 2D array with each entry containing an 1D array with the total counts for each category
+    # where the totals are [from row, to (but not including) row]
+    n = len(input_list)
+    column_headings = get_category_names_from_list(input_list)
+    sparse_array = np.zeros((len(input_list), len(column_headings)), dtype=int)
+    for index, item in enumerate(input_list):
+        sparse_array[index, column_headings.index(item)]=1
+    counts_array = np.zeros((n, n + 1), dtype=object)
+    for start in range(0, n):
+        for stop in range(0, n + 1):
+            if stop > start:  # only do this if it makes sense
+                counts_array[start, stop] = counts_array[start, stop - 1] + sparse_array[stop - 1]
+    return counts_array
