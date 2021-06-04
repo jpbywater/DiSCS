@@ -10,10 +10,12 @@ The DiSCS functions are written in Python. To use them:
 ```
  from DiSCSfunctions import *
 ```
+ - check the python packages `numpy`, `scipy`, and `sklearn` are installed.
  - segment a sequence with the function:
  ```
 find_best_cut_positions(sequence)
 ```
+
 For example, the code:
 ```
 sequence = ['A','A','A','A','B','B','B','C','C','C','C','C']
