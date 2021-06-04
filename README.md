@@ -24,7 +24,7 @@ will output:
 ```
 [0, 4, 7, 12]
 ```
-This indicates that the DiSCS algorithm found the most distinct segments when the sequence was cuts at position 4 (i.e. between the As and the Bs) and position 7 (i.e. between the Bs and the Cs).
+This indicates that the DiSCS algorithm found the most distinct segments when the sequence was cut at position 4 (i.e. between the As and the Bs) and position 7 (i.e. between the Bs and the Cs).
 
 ### DiSCS Performance
 
