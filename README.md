@@ -1,6 +1,9 @@
 ## The Differential Segmentation of Categorical Sequences (DiSCS) algorithm 
 DiSCS is an algorithm that takes a categorial sequence and splits it into segments so that each of the segments is as different from its immediate neighbors as possible. In effect, it finds the most distinct segments within a sequence of categories.
 
+### DiSCS Demonstration site
+Click [here](https://jpbywater.pythonanywhere.com/) for an interactive visual demo of the DiSCS algorithm segmenting sequences.
+
 ### Using DiSCS
 The DiSCS functions are written in Python. To use them:
  - copy the file `DiSCSfunctions.py` into your project folder
