@@ -7,12 +7,12 @@ Click [here](https://jpbywater.pythonanywhere.com/) for an interactive visual de
 ### Using DiSCS
 The DiSCS functions are written in Python. To use them:
  - copy the file `DiSCSfunctions.py` into your project folder
- - import the DiSCS functions with:
+ - check the python packages `numpy`, `scipy`, and `sklearn` are installed in your virtual environment
+ - in your python script, import the DiSCS functions with:
 ```
  from DiSCSfunctions import *
 ```
- - check the python packages `numpy`, `scipy`, and `sklearn` are installed.
- - segment a sequence with the function:
+ - in your python script, segment a sequence with the function:
  ```
 find_best_cut_positions(sequence)
 ```
