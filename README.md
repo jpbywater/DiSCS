@@ -31,7 +31,7 @@ This indicates that the DiSCS algorithm found the most distinct segments when th
 
 ### DiSCS Performance
 
-This [peer-reviewed paper (AIED2021)](https://github.com/jpbywater/DiSCS/blob/main/DiSCS%20_final_camera_ready.pdf) reports detailed DiSCS performance data from a simulation study. The script used for the simulation study is:
+This [peer-reviewed paper (AIED2021)](https://github.com/jpbywater/DiSCS/blob/main/Bywater2021_Chapter_DiSCSANewSequenceSegmentationM.pdf) reports detailed DiSCS performance data from a simulation study. The script used for the simulation study is:
 ```
 AIED2021_simulation_script.py
 ```
