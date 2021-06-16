@@ -22,7 +22,7 @@ find_best_cut_positions(sequence)
 
 For example, the code:
 ```
-sequence = ['A','A','A','A','B','B','B','C','C','C','C','C']
+sequence = ['A','A','A','A','B','B','B','A','A','A','A','A']
 cut_positions, stat = find_best_cut_positions(sequence)
 print(cut_postions)
 ```
@@ -30,7 +30,7 @@ will output:
 ```
 [0, 4, 7, 12]
 ```
-This indicates that the DiSCS algorithm found the most distinct segments when the sequence was cut at position 4 (i.e. between the As and the Bs) and position 7 (i.e. between the Bs and the Cs).
+This indicates that the DiSCS algorithm found the most distinct segments when the sequence was cut at positions 4 and 7 (i.e. at the boundaries of the As and the Bs).
 
 ### DiSCS Performance
 
